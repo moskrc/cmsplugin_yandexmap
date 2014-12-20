@@ -1,0 +1,5 @@
+*.pyc
+env/*
+.idea/*
+cmsplugin_yandexmap.egg-info
+dist

@@ -1,0 +1,57 @@
+{% load i18n sekizai_tags %}
+
+{% addtoblock "js" %}
+    <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script type="text/javascript">
+        (function () {
+            // save settings form plugin
+            var container = 'yandex-map-{{ object.id }}';
+            var latLng = null;
+            var title = "{{ object.get_title }}";
+            var address = "{{ object.zipcode }}, {{ object.city }}, {{ object.address }}";
+            var additional_content = "{{ object.get_content }}";
+            var zoom = {{ object.get_zoom_level }};
+
+            var map;
+            ymaps.ready(init);
+
+            function init() {
+                // load latlng from given address
+                var myGeocoder = ymaps.geocode(address);
+                myGeocoder.then(
+                        function (res) {
+                            initYandexMaps(res.geoObjects.get(0).geometry.getCoordinates());
+                        }
+                );
+            }
+
+            // initialize yandex maps
+            function initYandexMaps(latlng) {
+                // initialize yandex map
+                map = new ymaps.Map(container, {
+                    center: latlng,
+                    zoom: zoom
+                });
+
+                var myPlacemark = new ymaps.Placemark(latlng, {
+                    iconContent :'{{ object.title }}',
+                    hintContent: '{{ object.title }}',
+                    balloonContent: '<div style="heigth:130px;">\
+                    <strong>{{ object.title }}</strong><br/><br/>{{ object.address }}<br/>{{ object.get_content }}</div>'
+                },{
+                {% if object.title %}
+                     preset: 'islands#blueStretchyIcon'
+                {% else %}
+                    preset: 'islands#blueIcon'
+                {% endif %}
+                });
+                map.geoObjects.add(myPlacemark);
+            }
+        })();
+    </script>
+{% endaddtoblock %}
+
+<div class="plugin_yandexmap">
+    <!--  ATTENTION: set a height for this div in CSS -->
+    <div id="yandex-map-{{ object.id }}" class="yandex-map-container" style="width: 600px; height: 400px"></div>
+</div>
